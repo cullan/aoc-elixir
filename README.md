@@ -1,21 +1,13 @@
 # AdventOfCode
 
-**TODO: Add description**
+Help Santa by programming computers.
 
-## Installation
+## Setup
 
-If [available in Hex](https://hex.pm/docs/publish), the package can be installed
-by adding `advent_of_code` to your list of dependencies in `mix.exs`:
+The project includes a nix development shell.
 
-```elixir
-def deps do
-  [
-    {:advent_of_code, "~> 0.1.0"}
-  ]
-end
+Make a file named `.secret` that looks like this:
+
+``` sh
+export AOC_SESSION_KEY="your key here"
 ```
-
-Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
-and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
-be found at <https://hexdocs.pm/advent_of_code>.
-
