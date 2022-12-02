@@ -7,6 +7,7 @@ defmodule Mix.Tasks.Aoc.Run do
   def run([day]), do: run([day, DateTime.utc_now().year])
 
   def run([day, year]) do
+    Mix.Task.run("app.start")
     module = :"Elixir.AdventOfCode.Year#{year}.Day#{AdventOfCode.zero_pad(day)}"
     input = Input.get!(day, year)
     IO.puts("part 1: #{module.part1(input)}")
