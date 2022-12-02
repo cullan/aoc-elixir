@@ -10,6 +10,7 @@ Make a file named `.secret` that looks like this:
 
 ``` sh
 export AOC_SESSION_KEY="your key here"
+export AOC_USER_AGENT="your repo url and email address"
 ```
 
 ## Prepare to solve a day's puzzles
@@ -24,7 +25,7 @@ mix aoc.prepare 1 2022
 ## Run the solution and print the answers
 
 The input is downloaded once and cached for subsequent runs. See the `Input`
-module for details.
+module and `aoc.run` mix task for details.
 
 ``` sh
 mix aoc.run 1 2022
