@@ -8,7 +8,10 @@ defmodule AdventOfCode do
   defp config(), do: Application.get_all_env(:advent_of_code)
 
   defp headers,
-    do: [{'cookie', String.to_charlist("session=" <> Keyword.get(config(), :session_key))}]
+    do: [
+      {'cookie', String.to_charlist("session=" <> Keyword.get(config(), :session_key))},
+      {'User-Agent', String.to_charlist(Keyword.get(config(), :user_agent))}
+    ]
 
   defp base_url(day, year), do: 'https://adventofcode.com/#{year}/day/#{day}'
 
