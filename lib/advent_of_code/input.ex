@@ -36,7 +36,8 @@ defmodule AdventOfCode.Input do
     |> Path.expand()
   end
 
-  defp cache_path(day, year), do: Path.join([cache_dir(), "#{year}/#{day}"])
+  defp cache_path(day, year),
+    do: Path.join([cache_dir(), "#{year}/#{AdventOfCode.zero_pad(day)}"])
 
   defp in_cache?(day, year), do: cache_path(day, year) |> File.exists?()
 
