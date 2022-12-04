@@ -34,14 +34,12 @@ defmodule AdventOfCode.Year2022.Day04 do
   def part1(input) do
     input
     |> section_assignment_pairs()
-    |> Enum.map(&fully_overlaps?/1)
-    |> Enum.count(&(&1))
+    |> Enum.count(&fully_overlaps?/1)
   end
 
   def part2(input) do
     input
     |> section_assignment_pairs()
-    |> Enum.map(&overlaps?/1)
-    |> Enum.count(&(&1))
+    |> Enum.count(&overlaps?/1)
   end
 end
