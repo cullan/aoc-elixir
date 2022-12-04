@@ -11,12 +11,18 @@ defmodule Mix.Tasks.Aoc.Prepare do
     description = AdventOfCode.fetch!(:description, day, year)
 
     lib_path = Path.join([file_path("lib", year), "day#{zero_pad(day)}.ex"])
-    lib_path |> Path.dirname() |> File.mkdir_p()
-    File.write(lib_path, source_template(day, year, description))
-
     test_path = Path.join([file_path("test", year), "day#{zero_pad(day)}_test.exs"])
+
+    # create directories as needed
+    lib_path |> Path.dirname() |> File.mkdir_p()
     test_path |> Path.dirname() |> File.mkdir_p()
-    File.write(test_path, test_template(day, year))
+
+    # create files using templates if they are not already there
+    unless File.exists?(lib_path),
+      do: File.write(lib_path, source_template(day, year, description))
+
+    unless File.exists?(test_path),
+      do: File.write(test_path, test_template(day, year))
   end
 
   defp file_path(type, year), do: Path.join([File.cwd!(), type, "advent_of_code", "year#{year}"])
