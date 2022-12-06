@@ -1,3 +1,9 @@
 defmodule IExHelpers do
-  def recompile, do: IEx.Helpers.recompile()
+  defmacro workon(day, year \\ DateTime.utc_now().year) do
+    quote do
+      alias unquote(:"Elixir.AdventOfCode.Year#{year}.Day#{AdventOfCode.zero_pad(day)}")
+    end
+  end
 end
+
+import IExHelpers

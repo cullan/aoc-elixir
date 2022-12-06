@@ -3,7 +3,7 @@ defmodule AdventOfCode do
   Documentation for `AdventOfCode`.
   """
 
-  def zero_pad(day), do: day |> String.pad_leading(2, "0")
+  def zero_pad(day), do: "#{day}" |> String.pad_leading(2, "0")
 
   defp config(), do: Application.get_all_env(:advent_of_code)
 
