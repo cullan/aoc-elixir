@@ -26,7 +26,7 @@ defmodule AdventOfCode.Year2022.Day05 do
   Skip if the crate id is not in [A-Z] (nothing was there).
   eg: {2, ?C}, %{"2" => [?M]} => %{"2" => [?C ?M]}
   """
-  def push_crate({stack_id, crate_id}, stacks) when crate_id > 64 and crate_id < 91,
+  def push_crate({crate_id, stack_id}, stacks) when crate_id > 64 and crate_id < 91,
     do: Map.update(stacks, Integer.to_string(stack_id), [crate_id], &[crate_id | &1])
 
   def push_crate({_, _}, stacks), do: stacks
@@ -35,8 +35,9 @@ defmodule AdventOfCode.Year2022.Day05 do
   Push all the crate ids in the current layer onto the correct stacks.
   """
   def push_crates(layer, stacks) do
-    # number the crate ids, eg: [?Z ?M ?P] => [{1, ?Z}, {2, ?M}, {3, ?P}]
-    Enum.zip(Stream.iterate(1, &(&1 + 1)), read_crates(layer))
+    layer
+    |> read_crates()
+    |> Stream.with_index(1)
     |> Enum.reduce(stacks, &push_crate/2)
   end
 
