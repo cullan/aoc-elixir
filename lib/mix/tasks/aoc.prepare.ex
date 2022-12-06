@@ -51,24 +51,26 @@ defmodule Mix.Tasks.Aoc.Prepare do
 
       import AdventOfCode.Year#{year}.Day#{zero_pad(day)}
 
-      @part1_input %{
-        "" => nil
-      }
+      @input ""
 
-      @part2_input %{
-        "" => nil
-      }
+      @part1_expected_results [
+        {@input, :fixme}
+      ]
+
+      @part2_expected_results [
+        {@input, :fixme}
+      ]
 
       @tag :skip
       test "part1" do
-        for {input, result} <- @part1_input do
+        for {input, result} <- @part1_expected_results do
           assert part1(input) == result
         end
       end
 
       @tag :skip
       test "part2" do
-        for {input, result} <- @part2_input do
+        for {input, result} <- @part2_expected_results do
           assert part2(input) == result
         end
       end
