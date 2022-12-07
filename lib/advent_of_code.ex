@@ -36,4 +36,10 @@ defmodule AdventOfCode do
 
     to_string(response)
   end
+
+  def permutations([]), do: [[]]
+
+  def permutations(lst) do
+    for head <- lst, tail <- permutations(lst -- [head]), do: [head | tail]
+  end
 end
