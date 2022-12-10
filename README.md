@@ -16,7 +16,8 @@ export AOC_USER_AGENT="your repo url and email address"
 ## Prepare to solve a day's puzzles
 
 There is a mix task to create source and test files for a day. The year argument
-is optional. It defaults to the current year.
+is optional. It defaults to the current year. The title is scraped from the problem
+description on the AOC web site.
 
 ``` sh
 mix aoc.prepare 1 2022
@@ -30,3 +31,11 @@ module and `aoc.run` mix task for details.
 ``` sh
 mix aoc.run 1 2022
 ```
+
+## API Automation notes
+
+- API calls only happen when one of the mix tasks is run.
+- API calls have a cooldown of 3 minutes.
+- Downloaded inputs are cached and reused.
+- The title is not scraped again once a puzzle source code file is created.
+- The user agent is configured by the AOC_USER_AGENT env var.

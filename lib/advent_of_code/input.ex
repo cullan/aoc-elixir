@@ -30,21 +30,15 @@ defmodule AdventOfCode.Input do
     to_string(input)
   end
 
-  defp cache_dir do
-    [System.get_env("XDG_CACHE_HOME", "~/.cache"), "/advent_of_code"]
-    |> Path.join()
-    |> Path.expand()
-  end
+  defp input_cache_path(day, year),
+    do: Path.join([AdventOfCode.cache_dir(), "input/#{year}/#{AdventOfCode.zero_pad(day)}"])
 
-  defp cache_path(day, year),
-    do: Path.join([cache_dir(), "#{year}/#{AdventOfCode.zero_pad(day)}"])
+  defp in_cache?(day, year), do: input_cache_path(day, year) |> File.exists?()
 
-  defp in_cache?(day, year), do: cache_path(day, year) |> File.exists?()
-
-  defp from_cache!(day, year), do: cache_path(day, year) |> File.read!()
+  defp from_cache!(day, year), do: input_cache_path(day, year) |> File.read!()
 
   defp store_in_cache!(day, year, input) do
-    path = cache_path(day, year)
+    path = input_cache_path(day, year)
     :ok = path |> Path.dirname() |> File.mkdir_p()
     :ok = File.write(path, input)
   end

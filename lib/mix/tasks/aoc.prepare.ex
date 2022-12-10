@@ -18,8 +18,8 @@ defmodule Mix.Tasks.Aoc.Prepare do
 
     unless File.exists?(path) do
       path |> Path.dirname() |> File.mkdir_p()
-      description = AdventOfCode.fetch!(:description, day, year)
-      File.write(path, source_template(day, year, description))
+      title = AdventOfCode.fetch!(:title, day, year)
+      File.write(path, source_template(day, year, title))
     end
   end
 
