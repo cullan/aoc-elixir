@@ -8,21 +8,28 @@ defmodule Mix.Tasks.Aoc.Prepare do
     # need to run the app to load the config that has the session token
     Mix.Task.run("app.start")
     IO.puts("preparing to solve #{year}/#{day}.")
-    description = AdventOfCode.fetch!(:description, day, year)
 
-    lib_path = Path.join([file_path("lib", year), "day#{zero_pad(day)}.ex"])
-    test_path = Path.join([file_path("test", year), "day#{zero_pad(day)}_test.exs"])
+    create_lib(day, year)
+    create_test(day, year)
+  end
 
-    # create directories as needed
-    lib_path |> Path.dirname() |> File.mkdir_p()
-    test_path |> Path.dirname() |> File.mkdir_p()
+  defp create_lib(day, year) do
+    path = Path.join([file_path("lib", year), "day#{zero_pad(day)}.ex"])
 
-    # create files using templates if they are not already there
-    unless File.exists?(lib_path),
-      do: File.write(lib_path, source_template(day, year, description))
+    unless File.exists?(path) do
+      path |> Path.dirname() |> File.mkdir_p()
+      description = AdventOfCode.fetch!(:description, day, year)
+      File.write(path, source_template(day, year, description))
+    end
+  end
 
-    unless File.exists?(test_path),
-      do: File.write(test_path, test_template(day, year))
+  defp create_test(day, year) do
+    path = Path.join([file_path("test", year), "day#{zero_pad(day)}_test.exs"])
+
+    unless File.exists?(path) do
+      path |> Path.dirname() |> File.mkdir_p()
+      File.write(path, test_template(day, year))
+    end
   end
 
   defp file_path(type, year), do: Path.join([File.cwd!(), type, "advent_of_code", "year#{year}"])
