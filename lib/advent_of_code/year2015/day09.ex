@@ -4,7 +4,7 @@ defmodule AdventOfCode.Year2015.Day09 do
   https://adventofcode.com/2015/day/9
   """
 
-  import AdventOfCode, only: [permutations: 1]
+  import AdventOfCode.Math, only: [permutations: 1]
 
   def parse_line(s) do
     [_, a, b, distance] = Regex.run(~r/([A-Za-z]+) to ([A-Za-z]+) = (\d+)/, s)

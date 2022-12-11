@@ -85,10 +85,4 @@ defmodule AdventOfCode do
         {:error, error}
     end
   end
-
-  def permutations([]), do: [[]]
-
-  def permutations(lst) do
-    for head <- lst, tail <- permutations(lst -- [head]), do: [head | tail]
-  end
 end
