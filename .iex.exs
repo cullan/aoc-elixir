@@ -7,3 +7,7 @@ defmodule IExHelpers do
 end
 
 import IExHelpers
+
+# default to displaying charlists as lists
+# IO.inspect(item, charlists: :infer) can be used to manually view charlists
+IEx.configure(inspect: [charlists: :as_lists])
