@@ -176,7 +176,7 @@ defmodule AdventOfCode.Year2022.Day10Test do
 
   test "part2" do
     for {input, result} <- @part2_expected_results do
-      assert part2(input) == String.trim(result)
+      assert screen_output(input) |> Enum.join("\n") == String.trim(result)
     end
   end
 end

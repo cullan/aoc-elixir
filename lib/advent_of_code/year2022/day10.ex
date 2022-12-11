@@ -4,12 +4,16 @@ defmodule AdventOfCode.Year2022.Day10 do
   https://adventofcode.com/2022/day/10
   """
 
+  alias AdventOfCode.OCR
+
   defp parse_input(input) do
     input
     |> String.split("\n", trim: true)
     |> Stream.flat_map(fn instruction ->
       cond do
-        instruction == "noop" -> [:noop]
+        instruction == "noop" ->
+          [:noop]
+
         String.starts_with?(instruction, "addx ") ->
           [_, n] = String.split(instruction)
           # replace addx n with noop, addx n to simplify executing later
@@ -28,6 +32,7 @@ defmodule AdventOfCode.Year2022.Day10 do
       instructions
       |> Stream.transform(1, &execute/2)
       |> Stream.with_index(2)
+
     Stream.concat([{1, 1}], stream)
   end
 
@@ -42,13 +47,23 @@ defmodule AdventOfCode.Year2022.Day10 do
   defp signal_strength({val, cycle}), do: val * cycle
 
   defp visible?({val, cycle}, row) do
-    current = cycle - (row * 40)
+    current = cycle - row * 40
     current >= val and current < val + 3
   end
 
   defp pixels({values, row}) do
     values
     |> Stream.map(fn cycle_val -> if visible?(cycle_val, row), do: "#", else: "." end)
+  end
+
+  def screen_output(input) do
+    input
+    |> parse_input()
+    |> values_during_cycles()
+    |> Stream.chunk_every(40, 40, :discard)
+    |> Stream.with_index(0)
+    |> Stream.map(&pixels/1)
+    |> Stream.map(&Enum.join(&1, ""))
   end
 
   def part1(input) do
@@ -61,12 +76,7 @@ defmodule AdventOfCode.Year2022.Day10 do
 
   def part2(input) do
     input
-    |> parse_input()
-    |> values_during_cycles()
-    |> Stream.chunk_every(40, 40, :discard)
-    |> Stream.with_index(0)
-    |> Stream.map(&pixels/1)
-    |> Stream.map(&Enum.join(&1, ""))
-    |> Enum.join("\n")
+    |> screen_output()
+    |> OCR.read_screen()
   end
 end
