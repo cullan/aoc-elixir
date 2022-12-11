@@ -62,7 +62,6 @@ defmodule AdventOfCode do
   defp check_cooldown() do
     cooldown = Keyword.get(config(), :api_cooldown_seconds)
     elapsed = DateTime.diff(DateTime.utc_now(), last_fetched_time!(), :second)
-    IO.inspect({cooldown, elapsed})
     if elapsed > cooldown, do: :ok, else: :too_soon
   end
 
