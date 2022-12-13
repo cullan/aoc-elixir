@@ -4,6 +4,8 @@ defmodule AdventOfCode.Year2022.Day09 do
   https://adventofcode.com/2022/day/9
   """
 
+  import AdventOfCode.Grid, only: [move: 2, move_toward: 2]
+
   @directions %{
     "U" => :up,
     "D" => :down,
@@ -18,28 +20,6 @@ defmodule AdventOfCode.Year2022.Day09 do
       [direction, count] = String.split(row)
       {Map.get(@directions, direction), String.to_integer(count)}
     end)
-  end
-
-  defp move({x, y}, :up), do: {x, y - 1}
-  defp move({x, y}, :down), do: {x, y + 1}
-  defp move({x, y}, :left), do: {x - 1, y}
-  defp move({x, y}, :right), do: {x + 1, y}
-  defp move({x, y}, :up_right), do: {x + 1, y - 1}
-  defp move({x, y}, :up_left), do: {x - 1, y - 1}
-  defp move({x, y}, :down_right), do: {x + 1, y + 1}
-  defp move({x, y}, :down_left), do: {x - 1, y + 1}
-
-  defp move_toward({x1, y1} = p, {x2, y2}) do
-    cond do
-      x2 > x1 and y2 == y1 -> move(p, :right)
-      x2 < x1 and y2 == y1 -> move(p, :left)
-      x2 == x1 and y2 < y1 -> move(p, :up)
-      x2 == x1 and y2 > y1 -> move(p, :down)
-      x2 > x1 and y2 < y1 -> move(p, :up_right)
-      x2 < x1 and y2 < y1 -> move(p, :up_left)
-      x2 > x1 and y2 > y1 -> move(p, :down_right)
-      x2 < x1 and y2 > y1 -> move(p, :down_left)
-    end
   end
 
   defp distance({x1, y1}, {x2, y2}) do

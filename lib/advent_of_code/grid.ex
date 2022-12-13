@@ -53,27 +53,27 @@ defmodule AdventOfCode.Grid do
   def at(%Grid{cells: cells}, point), do: Map.fetch(cells, point)
   def at!(%Grid{cells: cells}, point), do: Map.fetch!(cells, point)
 
-  def move_toward(%Grid{} = g, point1, point2),
-    do: point_or_error(g, move_toward_helper(point1, point2))
+  def move_toward(%Grid{} = g, point1, point2), do: point_or_error(g, move_toward(point1, point2))
 
-  defp move_toward_helper({x1, y1}, {x2, y2}) do
+  def move({x, y}, :up), do: {x, y - 1}
+  def move({x, y}, :down), do: {x, y + 1}
+  def move({x, y}, :left), do: {x - 1, y}
+  def move({x, y}, :right), do: {x + 1, y}
+  def move({x, y}, :up_right), do: {x + 1, y - 1}
+  def move({x, y}, :up_left), do: {x - 1, y - 1}
+  def move({x, y}, :down_right), do: {x + 1, y + 1}
+  def move({x, y}, :down_left), do: {x - 1, y + 1}
+
+  def move_toward({x1, y1} = p, {x2, y2}) do
     cond do
-      # move right
-      x2 > x1 and y2 == y1 -> {x1 + 1, y1}
-      # move left
-      x2 < x1 and y2 == y1 -> {x1 - 1, y1}
-      # move up
-      x2 == x1 and y2 < y1 -> {x1, y1 - 1}
-      # move down
-      x2 == x1 and y2 > y1 -> {x1, y1 + 1}
-      # diagonal up right
-      x2 > x1 and y2 < y1 -> {x1 + 1, y1 - 1}
-      # diagonal up left
-      x2 < x1 and y2 < y1 -> {x1 - 1, y1 - 1}
-      # diagonal down right
-      x2 > x1 and y2 > y1 -> {x1 + 1, y1 + 1}
-      # diagonal down left
-      x2 < x1 and y2 > y1 -> {x1 - 1, y1 + 1}
+      x2 > x1 and y2 == y1 -> move(p, :right)
+      x2 < x1 and y2 == y1 -> move(p, :left)
+      x2 == x1 and y2 < y1 -> move(p, :up)
+      x2 == x1 and y2 > y1 -> move(p, :down)
+      x2 > x1 and y2 < y1 -> move(p, :up_right)
+      x2 < x1 and y2 < y1 -> move(p, :up_left)
+      x2 > x1 and y2 > y1 -> move(p, :down_right)
+      x2 < x1 and y2 > y1 -> move(p, :down_left)
     end
   end
 
