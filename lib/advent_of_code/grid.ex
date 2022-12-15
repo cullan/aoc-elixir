@@ -1,7 +1,7 @@
 defmodule AdventOfCode.Grid do
   alias __MODULE__
 
-  defstruct [:dimensions, :cells]
+  defstruct [:upper_left, :lower_right, :cells]
 
   def new(items) do
     cells =
@@ -17,17 +17,18 @@ defmodule AdventOfCode.Grid do
       end)
       |> elem(0)
 
-    %Grid{dimensions: dimensions(items), cells: cells}
+    %Grid{upper_left: {0, 0}, lower_right: lower_right(items), cells: cells}
   end
 
-  defp dimensions(items) do
-    {length(hd(items)), length(items)}
+  def new(size_x, size_y) do
+    %Grid{upper_left: {0, 0}, lower_right: {size_x - 1, size_y - 1}, cells: %{}}
   end
 
-  def in_bounds?(%Grid{dimensions: {l, h}}, {x, y}) when x >= 0 and x < l and y >= 0 and y < h,
-    do: true
+  def new(), do: %Grid{upper_left: {0, 0}, lower_right: {0, 0}, cells: %{}}
 
-  def in_bounds?(_, _), do: false
+  defp lower_right(items) do
+    {length(hd(items)) - 1, length(items) - 1}
+  end
 
   @doc """
   Traverse the cells of the grid and collect the results of running the function on each cell.
@@ -54,11 +55,25 @@ defmodule AdventOfCode.Grid do
     |> elem(0)
   end
 
+  def in_bounds?(%Grid{upper_left: {x1, y1}, lower_right: {x2, y2}}, {x, y})
+      when x >= x1 and x <= x2 and y >= y1 and y <= y2,
+      do: true
+
+  def in_bounds?(_, _), do: false
+
   # return the point if it is in bounds, otherwise :error
   defp point_in_grid(%Grid{} = g, point),
     do: if(in_bounds?(g, point), do: {:ok, point}, else: :error)
 
-  def at(%Grid{cells: cells}, point), do: Map.fetch(cells, point)
+  def at(%Grid{cells: cells}, point) do
+    val = Map.fetch(cells, point)
+
+    case val do
+      :error -> :empty
+      _ -> val
+    end
+  end
+
   def at!(%Grid{cells: cells}, point), do: Map.fetch!(cells, point)
 
   @doc """
@@ -107,18 +122,18 @@ defmodule AdventOfCode.Grid do
   Find the point on the edge heading in the specified direction from the point.
   """
   def edge_point(%Grid{}, {x, _y}, :up), do: {x, 0}
-  def edge_point(%Grid{dimensions: {_l, h}}, {x, _y}, :down), do: {x, h - 1}
+  def edge_point(%Grid{lower_right: {_x, y}}, {x, _y}, :down), do: {x, y}
   def edge_point(%Grid{}, {_x, y}, :left), do: {0, y}
-  def edge_point(%Grid{dimensions: {l, _h}}, {_x, y}, :right), do: {l - 1, y}
+  def edge_point(%Grid{upper_left: {x, _y}}, {_x, y}, :right), do: {x, y}
 
-  def line_segment(grid, point1, point2, acc \\ [])
+  def line_segment(point1, point2, acc \\ [])
 
-  def line_segment(%Grid{}, point1, point2, acc) when point1 == point2,
+  def line_segment(point1, point2, acc) when point1 == point2,
     do: [point1 | acc]
 
-  def line_segment(%Grid{} = g, point1, point2, acc) do
-    {:ok, next_point} = move_toward(g, point2, point1)
-    line_segment(g, point1, next_point, [point2 | acc])
+  def line_segment(point1, point2, acc) do
+    next_point = move_toward(point2, point1)
+    line_segment(point1, next_point, [point2 | acc])
   end
 
   def line_segment_to_edge(%Grid{} = g, point, direction),
@@ -142,6 +157,70 @@ defmodule AdventOfCode.Grid do
     |> Enum.filter(&in_bounds?(g, &1))
   end
 
-  def put(%Grid{cells: cells} = g, point, value),
-    do: %Grid{g | cells: Map.put(cells, point, value)}
+  @doc """
+  Put the value in the grid at the given point.
+
+  The grid must already be large enough to have that point.
+  """
+  def put!(%Grid{cells: cells} = g, point, value) do
+    true = in_bounds?(g, point)
+    %Grid{g | cells: Map.put(cells, point, value)}
+  end
+
+  @doc """
+  Put the value in the grid at the given point and grow the grid as needed.
+  """
+  def put(%Grid{} = g, {x, y} = point, value) do
+    %{upper_left: {x1, y1}, lower_right: {x2, y2}, cells: cells} = g
+    left = {min(x, x1), min(y, y1)}
+    right = {max(x, x2), max(y, y2)}
+    %Grid{g | upper_left: left, lower_right: right, cells: Map.put(cells, point, value)}
+  end
+
+  @doc """
+  Find the minimum {x, y} contained in the cells.
+  """
+  def min_extent(%Grid{cells: cells}) do
+    first_point = cells |> Enum.to_list() |> hd() |> elem(0)
+
+    cells
+    |> Enum.reduce(first_point, fn {{x, y}, _}, {min_x, min_y} ->
+      {min(x, min_x), min(y, min_y)}
+    end)
+  end
+
+  @doc """
+  Find the maximum {x, y} contained in the cells.
+  """
+  def max_extent(%Grid{cells: cells}) do
+    cells
+    |> Enum.reduce({0, 0}, fn {{x, y}, _}, {max_x, max_y} ->
+      {max(x, max_x), max(y, max_y)}
+    end)
+  end
+
+  @doc """
+  Create a string representation of the grid contents.
+  """
+  def to_string(%Grid{cells: cells} = g, args \\ []) do
+    occupied = args[:occupied] || "#"
+    empty = args[:empty] || "."
+    {x1, y1} = args[:upper_left] || min_extent(g)
+    {x2, y2} = args[:lower_right] || max_extent(g)
+
+    cell_vals =
+      for y <- y1..y2,
+          x <- x1..x2 do
+        if Map.has_key?(cells, {x, y}) do
+          if occupied == :val, do: Map.get(cells, {x, y}), else: occupied
+        else
+          empty
+        end
+      end
+
+    cell_vals
+    |> Enum.chunk_every(x2 - x1 + 1)
+    |> Enum.map(&Enum.join/1)
+    |> Enum.join("\n")
+  end
 end

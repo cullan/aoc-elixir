@@ -23,8 +23,8 @@ defmodule AdventOfCode.Year2022.Day08 do
   # trees on the edge are visible
   def visible?(%Grid{}, {0, _}, _), do: true
   def visible?(%Grid{}, {_, 0}, _), do: true
-  def visible?(%Grid{dimensions: {l, _}}, {x, _}, _) when x + 1 == l, do: true
-  def visible?(%Grid{dimensions: {_, h}}, {_, y}, _) when y + 1 == h, do: true
+  def visible?(%Grid{lower_right: {x1, _y}}, {x, _}, _) when x == x1, do: true
+  def visible?(%Grid{lower_right: {_x, y1}}, {_, y}, _) when y == y1, do: true
   # look in each direction until finding a larger tree or the edge
   def visible?(%Grid{} = g, point, val) do
     [:up, :down, :left, :right]
