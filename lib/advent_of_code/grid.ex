@@ -55,6 +55,8 @@ defmodule AdventOfCode.Grid do
     |> elem(0)
   end
 
+  def filter(%Grid{cells: cells}, fun), do: Enum.filter(cells, fun)
+
   def in_bounds?(%Grid{upper_left: {x1, y1}, lower_right: {x2, y2}}, {x, y})
       when x >= x1 and x <= x2 and y >= y1 and y <= y2,
       do: true
@@ -86,14 +88,19 @@ defmodule AdventOfCode.Grid do
   @doc """
   Move the point in the given direction.
   """
-  def move({x, y}, :up), do: {x, y - 1}
-  def move({x, y}, :down), do: {x, y + 1}
-  def move({x, y}, :left), do: {x - 1, y}
-  def move({x, y}, :right), do: {x + 1, y}
-  def move({x, y}, :up_right), do: {x + 1, y - 1}
-  def move({x, y}, :up_left), do: {x - 1, y - 1}
-  def move({x, y}, :down_right), do: {x + 1, y + 1}
-  def move({x, y}, :down_left), do: {x - 1, y + 1}
+  def move(point, direction), do: move_n(point, direction, 1)
+
+  @doc """
+  Move the point n spaces in the given direction.
+  """
+  def move_n({x, y}, :up, n), do: {x, y - n}
+  def move_n({x, y}, :down, n), do: {x, y + n}
+  def move_n({x, y}, :left, n), do: {x - n, y}
+  def move_n({x, y}, :right, n), do: {x + n, y}
+  def move_n({x, y}, :up_right, n), do: {x + n, y - n}
+  def move_n({x, y}, :up_left, n), do: {x - n, y - n}
+  def move_n({x, y}, :down_right, n), do: {x + n, y + n}
+  def move_n({x, y}, :down_left, n), do: {x - n, y + n}
 
   @doc """
   Move the point toward the other point within the Grid.
