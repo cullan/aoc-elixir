@@ -31,23 +31,31 @@ defmodule AdventOfCode.Year2022.Day15 do
   end
 
   # min and max x values of sensor coverage over the given row
-  defp horizontal_extent(sensor_log, row) do
-    {first, _, _} = sensor_log |> hd()
-
-    sensor_log
-    |> Enum.reduce(first, fn {{x, y}, _, size}, {min, max} ->
-      shift = size - abs(row - y)
-      {min(x - shift, min), max(x + shift, max)}
-    end)
+  defp horizontal_extent({{x, y} = _sensor, _, size}, row) do
+    shift = size - abs(row - y)
+    {x - shift, x + shift}
   end
 
-  # is the point scanned by a sensor?
-  defp scanned?(point, sensor_log) do
-    sensor_log
-    |> Enum.any?(fn {scanner, _, size} ->
-      distance(scanner, point) <= size
-    end)
+  defp overlaps?({a_min, a_max}, {b_min, b_max}) do
+    not Range.disjoint?(
+      Range.new(a_min, a_max),
+      Range.new(b_min, b_max)
+    )
   end
+
+  # combine overlapping ranges to make one larger range
+  # eg: [{-2, 2}, {2, 3}, {4, 5}] => [{4, 5}, {-2, 3}] (no point in reversing for this)
+  defp combine_ranges(ranges, acc \\ [])
+
+  defp combine_ranges([{min, a_max} = a, {_, b_max} = b | rest], acc) do
+    if overlaps?(a, b) do
+      combine_ranges([{min, max(a_max, b_max)} | rest], acc)
+    else
+      combine_ranges([b | rest], [a | acc])
+    end
+  end
+
+  defp combine_ranges(ranges, acc), do: ranges ++ acc
 
   # if any of the corners of the rectangle are outside the sensor range, the beacon could be in there
   defp not_fully_scanned_by_sensor?({x1, y1}, {x2, y2}, {sensor, _beacon, size}) do
@@ -106,11 +114,22 @@ defmodule AdventOfCode.Year2022.Day15 do
       |> sensor_log()
       |> Enum.filter(&sensor_coverage_includes_row?(&1, row))
 
-    beacons = MapSet.new(sensor_log |> Enum.map(&elem(&1, 1)))
-    {min_x, max_x} = horizontal_extent(sensor_log, row)
+    num_beacons =
+      sensor_log
+      |> Enum.map(&elem(&1, 1))
+      |> Enum.filter(fn {_x, y} -> y == row end)
+      |> MapSet.new()
+      |> MapSet.size()
 
-    for(x <- min_x..max_x, do: {x, row})
-    |> Enum.count(&(scanned?(&1, sensor_log) and not MapSet.member?(beacons, &1)))
+    num_scanned =
+      sensor_log
+      |> Enum.map(&horizontal_extent(&1, row))
+      |> Enum.sort()
+      |> combine_ranges()
+      |> Enum.map(fn {min, max} -> 1 + max - min end)
+      |> Enum.sum()
+
+    num_scanned - num_beacons
   end
 
   def part2(input, max \\ 4_000_000) do
