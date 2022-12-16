@@ -26,26 +26,27 @@ defmodule AdventOfCode.Year2022.Day15 do
     abs(x1 - x2) + abs(y1 - y2)
   end
 
-  defp exclusion_zone_includes_row?({{_x, y}, _beacon, size}, row) do
+  defp sensor_coverage_includes_row?({{_x, y}, _beacon, size}, row) do
     row >= y - size and row <= y + size
   end
 
-  defp add_exclusion_zone_row({{x, y} = sensor, beacon, size}, row, points) do
-    shift = size - abs(row - y)
-    lx = x - shift
-    rx = x + shift
+  # min and max x values of sensor coverage over the given row
+  defp horizontal_extent(sensor_log, row) do
+    {first, _, _} = sensor_log |> hd()
 
-    for(x <- lx..rx, do: {x, row})
-    |> Enum.reject(&(&1 == sensor or &1 == beacon))
-    |> Enum.reduce(points, &MapSet.put(&2, &1))
+    sensor_log
+    |> Enum.reduce(first, fn {{x, y}, _, size}, {min, max} ->
+      shift = size - abs(row - y)
+      {min(x - shift, min), max(x + shift, max)}
+    end)
   end
 
-  defp exclusion_size(input, row) do
-    input
-    |> sensor_log()
-    |> Enum.filter(&exclusion_zone_includes_row?(&1, row))
-    |> Enum.reduce(MapSet.new(), &add_exclusion_zone_row(&1, row, &2))
-    |> MapSet.size()
+  # is the point scanned by a sensor?
+  defp scanned?(point, sensor_log) do
+    sensor_log
+    |> Enum.any?(fn {scanner, _, size} ->
+      distance(scanner, point) <= size
+    end)
   end
 
   # if any of the corners of the rectangle are outside the sensor range, the beacon could be in there
@@ -55,8 +56,8 @@ defmodule AdventOfCode.Year2022.Day15 do
   end
 
   # none of the sensors can rule out this rectangle
-  defp not_fully_scanned_by_sensors?(upper_left, lower_right, sensor_log) do
-    Enum.all?(sensor_log, &not_fully_scanned_by_sensor?(upper_left, lower_right, &1))
+  defp not_fully_scanned_by_sensors?(corner1, corner2, sensor_log) do
+    Enum.all?(sensor_log, &not_fully_scanned_by_sensor?(corner1, corner2, &1))
   end
 
   # split the rectangle into four smaller rectangles that don't overlap.
@@ -100,7 +101,16 @@ defmodule AdventOfCode.Year2022.Day15 do
   defp tuning_frequency({x, y}), do: x * 4_000_000 + y
 
   def part1(input, row \\ 2_000_000) do
-    exclusion_size(input, row)
+    sensor_log =
+      input
+      |> sensor_log()
+      |> Enum.filter(&sensor_coverage_includes_row?(&1, row))
+
+    beacons = MapSet.new(sensor_log |> Enum.map(&elem(&1, 1)))
+    {min_x, max_x} = horizontal_extent(sensor_log, row)
+
+    for(x <- min_x..max_x, do: {x, row})
+    |> Enum.count(&(scanned?(&1, sensor_log) and not MapSet.member?(beacons, &1)))
   end
 
   def part2(input, max \\ 4_000_000) do
