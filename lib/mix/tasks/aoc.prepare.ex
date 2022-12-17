@@ -58,7 +58,8 @@ defmodule Mix.Tasks.Aoc.Prepare do
 
       import AdventOfCode.Year#{year}.Day#{zero_pad(day)}
 
-      @input ""
+      @input \"\"\"
+      \"\"\"
 
       @part1_expected_results [
         {@input, :fixme}
