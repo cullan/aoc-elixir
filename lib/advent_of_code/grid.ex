@@ -42,6 +42,13 @@ defmodule AdventOfCode.Grid do
     end)
   end
 
+  def reduce(%Grid{cells: cells} = g, acc, fun) do
+    cells
+    |> Enum.reduce(acc, fn {point, val}, acc ->
+      fun.(g, point, val, acc)
+    end)
+  end
+
   @doc """
   Return the first cell for which fun returns a truthy value. If no such element is found, returns nil.
 
