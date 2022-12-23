@@ -77,6 +77,24 @@ defmodule AdventOfCode.Grid do
   def reduce(%Grid{cells: cells} = g, acc, fun), do: cells |> Enum.reduce(acc, &fun.(g, &1, &2))
 
   @doc """
+  Return a list of the cells in the given row.
+  """
+  def row(%Grid{cells: cells}, row) do
+    cells
+    |> Enum.filter(fn {{_x, y}, _val} -> y == row end)
+    |> Enum.sort_by(&elem(&1, 0))
+  end
+
+  @doc """
+  Return a list of the cells in the given column.
+  """
+  def col(%Grid{cells: cells}, col) do
+    cells
+    |> Enum.filter(fn {{x, _y}, _val} -> x == col end)
+    |> Enum.sort_by(&elem(&1, 0))
+  end
+
+  @doc """
   Return the first cell for which fun returns a truthy value. If no such element is found, returns nil.
 
   fun/1 arg is a tuple: {{x, y}, cell_val}
