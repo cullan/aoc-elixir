@@ -3,7 +3,7 @@ defmodule AdventOfCode.Grid do
 
   defstruct [:upper_left, :lower_right, :cells]
 
-  def new(items) do
+  def new(items) when is_list(items) do
     cells =
       items
       |> Enum.reduce({%{}, 0}, fn row, {acc, y} ->
@@ -20,11 +20,36 @@ defmodule AdventOfCode.Grid do
     %Grid{upper_left: {0, 0}, lower_right: lower_right(items), cells: cells}
   end
 
-  def new(size_x, size_y) do
-    %Grid{upper_left: {0, 0}, lower_right: {size_x - 1, size_y - 1}, cells: %{}}
+  def new(s, char_map \\ &char_map/1) when is_binary(s) do
+    s
+    |> String.split("\n", trim: true)
+    |> Stream.with_index()
+    |> Enum.reduce(new(), fn {row, row_num}, row_g ->
+      row
+      |> String.codepoints()
+      |> Stream.with_index()
+      |> Enum.reduce(row_g, fn {val, col_num}, col_g ->
+        case char_map.(val) do
+          nil -> col_g
+          new_val -> put(col_g, {col_num, row_num}, new_val)
+        end
+      end)
+    end)
   end
 
   def new(), do: %Grid{upper_left: {0, 0}, lower_right: {0, 0}, cells: %{}}
+
+  # translate characters to values in the grid.
+  # default aoc maps usually have # for occupied spaces, . for open spaces.
+  #
+  # sometimes there is a " " (space char) that is in the string, but not part of
+  # the map. those should be discarded.
+  defp char_map(c) do
+    case c do
+      " " -> nil
+      _ -> c
+    end
+  end
 
   defp lower_right(items) do
     {length(hd(items)) - 1, length(items) - 1}
