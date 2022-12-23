@@ -192,6 +192,19 @@ defmodule AdventOfCode.Grid do
   end
 
   @doc """
+  Put the val in all the cells that are currently empty.
+  """
+  def fill_empty(%Grid{upper_left: {x1, y1}, lower_right: {x2, y2}} = g, val) do
+    for(x <- x1..x2, y <- y1..y2, do: {x, y})
+    |> Enum.reduce(g, fn {x, y}, g ->
+      case Grid.at(g, {x, y}) do
+        :empty -> Grid.put(g, {x, y}, val)
+        _ -> g
+      end
+    end)
+  end
+
+  @doc """
   Find the minimum {x, y} contained in the cells.
   """
   def min_extent(%Grid{cells: cells}) do
