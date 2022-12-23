@@ -31,23 +31,25 @@ defmodule AdventOfCode.Grid do
   end
 
   @doc """
-  Traverse the cells of the grid and collect the results of running the function on each cell.
+  Return the results of running the function on each cell.
 
-  fun/3 takes %Grid{}, {x, y}, val
+  fun/2 takes %Grid{}, {{x, y}, val}
   """
-  def traverse(%Grid{cells: cells} = g, fun) do
-    cells
-    |> Enum.map(fn {point, val} ->
-      fun.(g, point, val)
-    end)
-  end
+  def map(%Grid{cells: cells} = g, fun), do: cells |> Enum.map(&fun.(g, &1))
 
-  def reduce(%Grid{cells: cells} = g, acc, fun) do
-    cells
-    |> Enum.reduce(acc, fn {point, val}, acc ->
-      fun.(g, point, val, acc)
-    end)
-  end
+  @doc """
+  Filters the cells, i.e. returns only those elements for which fun returns a truthy value.
+
+  fun/2 takes %Grid{}, {{x, y}, val}
+  """
+  def filter(%Grid{cells: cells} = g, fun), do: cells |> Enum.filter(&fun.(g, &1))
+
+  @doc """
+  Invokes fun for each cell with the accumulator.
+
+  fun/3 takes %Grid{}, {{x, y}, val}, acc
+  """
+  def reduce(%Grid{cells: cells} = g, acc, fun), do: cells |> Enum.reduce(acc, &fun.(g, &1, &2))
 
   @doc """
   Return the first cell for which fun returns a truthy value. If no such element is found, returns nil.
@@ -61,8 +63,6 @@ defmodule AdventOfCode.Grid do
     |> Grid.find(fun)
     |> elem(0)
   end
-
-  def filter(%Grid{cells: cells}, fun), do: Enum.filter(cells, fun)
 
   def in_bounds?(%Grid{upper_left: {x1, y1}, lower_right: {x2, y2}}, {x, y})
       when x >= x1 and x <= x2 and y >= y1 and y <= y2,

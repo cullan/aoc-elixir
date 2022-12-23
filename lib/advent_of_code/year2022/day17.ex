@@ -140,7 +140,7 @@ defmodule AdventOfCode.Year2022.Day17 do
     {{_, i}, _} = next_item(jets)
 
     top_row =
-      Grid.reduce(g, %{}, fn %Grid{upper_left: {_x, grid_top_y}}, {x, y}, _val, acc ->
+      Grid.reduce(g, %{}, fn %Grid{upper_left: {_x, grid_top_y}}, {{x, y}, _val}, acc ->
         # check each point to see if it is the highest in its column.
         # if so, store how far away it is from the top.
         top_y = Map.get(acc, x, abs(grid_top_y))
