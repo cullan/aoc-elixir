@@ -11,6 +11,7 @@ import IExHelpers
 
 alias AdventOfCode.Grid
 alias AdventOfCode.Math
+alias AdventOfCode.CircleList
 
 # default to displaying charlists as lists
 # IO.inspect(item, charlists: :infer) can be used to manually view charlists
