@@ -8,7 +8,7 @@ defmodule AdventOfCode.Year2022.Day20 do
   import AdventOfCode.CircleList,
     only: [value: 1, seek: 2, insert: 2, pop: 1, reset: 1, seek_while: 2]
 
-  def circle(input, key \\ 1) do
+  defp circle(input, key \\ 1) do
     input
     |> String.split()
     |> Enum.map(&(String.to_integer(&1) * key))
@@ -16,11 +16,11 @@ defmodule AdventOfCode.Year2022.Day20 do
     |> CircleList.new()
   end
 
-  def mod(0, _), do: 0
-  def mod(n, size) when n > 0, do: rem(n, size - 1)
-  def mod(n, size) when n < 0, do: -rem(-n, size - 1)
+  defp mod(0, _), do: 0
+  defp mod(n, size) when n > 0, do: rem(n, size - 1)
+  defp mod(n, size) when n < 0, do: -rem(-n, size - 1)
 
-  def mix(circle) do
+  defp mix(circle) do
     size = CircleList.length(circle)
 
     {circle, 0}
@@ -36,7 +36,7 @@ defmodule AdventOfCode.Year2022.Day20 do
     |> elem(0)
   end
 
-  def mix_step({circle, index}, size) do
+  defp mix_step({circle, index}, size) do
     circle =
       circle
       |> reset()
@@ -57,7 +57,7 @@ defmodule AdventOfCode.Year2022.Day20 do
     end
   end
 
-  def grove_coordinates(circle) do
+  defp grove_coordinates(circle) do
     circle = circle |> seek_while(fn {item, _} -> item != 0 end)
 
     [1_000, 2_000, 3_000]

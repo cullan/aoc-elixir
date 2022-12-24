@@ -11,18 +11,18 @@ defmodule AdventOfCode.Year2022.Day21 do
     "-" => &Kernel.-/2
   }
 
-  def monkeys(input),
+  defp monkeys(input),
     do: input |> String.split("\n", trim: true) |> Enum.map(&monkey/1) |> Map.new()
 
-  def monkey(s), do: monkey(s, nil)
+  defp monkey(s), do: monkey(s, nil)
 
-  def monkey(<<id::binary-size(4), ": ", rest::binary>>, _),
+  defp monkey(<<id::binary-size(4), ": ", rest::binary>>, _),
     do: monkey(rest, String.to_atom(id))
 
-  def monkey(<<c::8, _rest::binary>> = n, id) when c >= 48 and c <= 57,
+  defp monkey(<<c::8, _rest::binary>> = n, id) when c >= 48 and c <= 57,
     do: {id, %{number: String.to_integer(n)}}
 
-  def monkey(<<id1::binary-size(4), " ", op::binary-size(1), " ", id2::binary-size(4)>>, id) do
+  defp monkey(<<id1::binary-size(4), " ", op::binary-size(1), " ", id2::binary-size(4)>>, id) do
     monkey = %{
       prerequisites: Enum.map([id1, id2], &String.to_atom/1),
       operator: op
@@ -32,7 +32,7 @@ defmodule AdventOfCode.Year2022.Day21 do
   end
 
   # calculate the value for the monkey with given id.
-  def calculate(%{} = monkeys, id) when is_atom(id) do
+  defp calculate(%{} = monkeys, id) when is_atom(id) do
     monkey = Map.get(monkeys, id)
 
     case monkey do
@@ -46,7 +46,7 @@ defmodule AdventOfCode.Year2022.Day21 do
   end
 
   # calculate all the values, leaving the path from :root to :humn partially calculated.
-  def calculate(%{} = monkeys) do
+  defp calculate(%{} = monkeys) do
     path = path(monkeys)
     # compute leaf monkey values
     monkeys =
@@ -77,9 +77,9 @@ defmodule AdventOfCode.Year2022.Day21 do
   end
 
   # find the path from :root to :humn.
-  def path(monkeys, queue \\ [{:root, []}])
+  defp path(monkeys, queue \\ [{:root, []}])
 
-  def path(monkeys, [{monkey, path} | queue]) do
+  defp path(monkeys, [{monkey, path} | queue]) do
     if monkey == :humn do
       Enum.reverse([:humn | path])
     else
@@ -99,9 +99,9 @@ defmodule AdventOfCode.Year2022.Day21 do
   end
 
   # get the value for the monkey, or its id if not calculated yet.
-  def substitute_value(_, :humn), do: :humn
+  defp substitute_value(_, :humn), do: :humn
 
-  def substitute_value(monkeys, id1) do
+  defp substitute_value(monkeys, id1) do
     case Map.get(monkeys, id1) do
       %{number: n} -> n
       _ -> id1
@@ -109,7 +109,7 @@ defmodule AdventOfCode.Year2022.Day21 do
   end
 
   # recursively solve for the variables on the path from :root to :humn.
-  def solve({id, val}, monkeys) do
+  defp solve({id, val}, monkeys) do
     %{operator: op, prerequisites: [a, b]} = Map.get(monkeys, id)
     {next_id, val} = solve(val, op, a, b)
 
@@ -121,15 +121,15 @@ defmodule AdventOfCode.Year2022.Day21 do
   end
 
   # determine the value of the variable.
-  def solve(val, "*", n, x) when is_integer(n), do: {x, div(val, n)}
-  def solve(val, "*", x, n) when is_integer(n), do: {x, div(val, n)}
+  defp solve(val, "*", n, x) when is_integer(n), do: {x, div(val, n)}
+  defp solve(val, "*", x, n) when is_integer(n), do: {x, div(val, n)}
   # luckily, this does not happen
-  # def solve(val, "/", n, x) when is_integer(n), do: {x, div(n, val)}
-  def solve(val, "/", x, n) when is_integer(n), do: {x, val * n}
-  def solve(val, "+", n, x) when is_integer(n), do: {x, val - n}
-  def solve(val, "+", x, n) when is_integer(n), do: {x, val - n}
-  def solve(val, "-", n, x) when is_integer(n), do: {x, n - val}
-  def solve(val, "-", x, n) when is_integer(n), do: {x, val + n}
+  # defp solve(val, "/", n, x) when is_integer(n), do: {x, div(n, val)}
+  defp solve(val, "/", x, n) when is_integer(n), do: {x, val * n}
+  defp solve(val, "+", n, x) when is_integer(n), do: {x, val - n}
+  defp solve(val, "+", x, n) when is_integer(n), do: {x, val - n}
+  defp solve(val, "-", n, x) when is_integer(n), do: {x, n - val}
+  defp solve(val, "-", x, n) when is_integer(n), do: {x, val + n}
 
   def part1(input) do
     input

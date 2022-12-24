@@ -4,7 +4,7 @@ defmodule AdventOfCode.Year2022.Day18 do
   https://adventofcode.com/2022/day/18
   """
 
-  def parse_input(input) do
+  defp parse_input(input) do
     input
     |> String.split("\n", trim: true)
     |> Enum.reduce({MapSet.new(), :infinity, 0}, fn s, {points, min, max} ->
@@ -15,7 +15,7 @@ defmodule AdventOfCode.Year2022.Day18 do
     end)
   end
 
-  def neighbors({x, y, z}) do
+  defp neighbors({x, y, z}) do
     [
       {1, 0, 0},
       {-1, 0, 0},
@@ -28,14 +28,14 @@ defmodule AdventOfCode.Year2022.Day18 do
     |> MapSet.new()
   end
 
-  def bounds_check_fn(min, max) do
+  defp bounds_check_fn(min, max) do
     fn {x, y, z} -> [x, y, z] |> Enum.any?(fn c -> c < min - 1 or c > max + 1 end) end
   end
 
   # find the points that are outside the droplet with bfs.
-  def outside_points(_cubes, [], points, _out_of_bounds?), do: points
+  defp outside_points(_cubes, [], points, _out_of_bounds?), do: points
 
-  def outside_points(cubes, [point | queue], points, out_of_bounds?) do
+  defp outside_points(cubes, [point | queue], points, out_of_bounds?) do
     points = MapSet.put(points, point)
 
     next =
