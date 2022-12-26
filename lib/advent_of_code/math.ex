@@ -24,4 +24,15 @@ defmodule AdventOfCode.Math do
   """
   def lcm([a]), do: a
   def lcm([a, b | rest]), do: lcm([lcm(a, b) | rest])
+
+  @doc """
+  Calculate the combinations
+  """
+  # https://rosettacode.org/wiki/Combinations#Elixir
+  def combinations(_, 0), do: [[]]
+  def combinations([], _), do: []
+
+  def combinations([h | t], m) do
+    for(l <- combinations(t, m - 1), do: [h | l]) ++ combinations(t, m)
+  end
 end
