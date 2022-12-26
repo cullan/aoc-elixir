@@ -94,9 +94,6 @@ defmodule AdventOfCode.Year2022.Day14 do
     |> Map.put(:lower_right, {x, y + 3})
   end
 
-  def debug(g),
-    do: IO.puts(Grid.to_string(g, occupied: :val, upper_left: {488, 0}, lower_right: {510, 12}))
-
   def part1(input) do
     overflow_round =
       input

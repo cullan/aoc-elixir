@@ -20,7 +20,7 @@ defmodule AdventOfCode.Grid do
     %Grid{upper_left: {0, 0}, lower_right: lower_right(items), cells: cells}
   end
 
-  def new(s, char_map \\ &char_map/1) when is_binary(s) do
+  def new(s, transform \\ &default_cell_transform/1) when is_binary(s) do
     s
     |> String.split("\n", trim: true)
     |> Stream.with_index()
@@ -29,7 +29,7 @@ defmodule AdventOfCode.Grid do
       |> String.codepoints()
       |> Stream.with_index()
       |> Enum.reduce(row_g, fn {val, col_num}, col_g ->
-        case char_map.(val) do
+        case transform.(val) do
           nil -> col_g
           new_val -> put(col_g, {col_num, row_num}, new_val)
         end
@@ -39,12 +39,12 @@ defmodule AdventOfCode.Grid do
 
   def new(), do: %Grid{upper_left: {0, 0}, lower_right: {0, 0}, cells: %{}}
 
-  # translate characters to values in the grid.
+  # transforms cell contents.
   # default aoc maps usually have # for occupied spaces, . for open spaces.
   #
   # sometimes there is a " " (space char) that is in the string, but not part of
   # the map. those should be discarded.
-  defp char_map(c) do
+  defp default_cell_transform(c) do
     case c do
       " " -> nil
       _ -> c
@@ -68,6 +68,13 @@ defmodule AdventOfCode.Grid do
   fun/2 takes %Grid{}, {{x, y}, val}
   """
   def filter(%Grid{cells: cells} = g, fun), do: cells |> Enum.filter(&fun.(g, &1))
+
+  @doc """
+  Returns the cells, excluding those for which fun returns a truthy value.
+
+  fun/2 takes %Grid{}, {{x, y}, val}
+  """
+  def reject(%Grid{cells: cells} = g, fun), do: cells |> Enum.reject(&fun.(g, &1))
 
   @doc """
   Invokes fun for each cell with the accumulator.
@@ -273,19 +280,17 @@ defmodule AdventOfCode.Grid do
   Create a string representation of the grid contents.
   """
   def to_string(%Grid{cells: cells} = g, args \\ []) do
-    occupied = args[:occupied] || "#"
-    empty = args[:empty] || "."
+    cell_fmt = args[:cell_fmt] || (& &1)
+    default = args[:default] || " "
     {x1, y1} = args[:upper_left] || min_extent(g)
     {x2, y2} = args[:lower_right] || max_extent(g)
 
     cell_vals =
       for y <- y1..y2,
           x <- x1..x2 do
-        if Map.has_key?(cells, {x, y}) do
-          if occupied == :val, do: Map.get(cells, {x, y}), else: occupied
-        else
-          empty
-        end
+        cells
+        |> Map.get({x, y}, default)
+        |> cell_fmt.()
       end
 
     cell_vals
