@@ -35,4 +35,8 @@ defmodule AdventOfCode.Math do
   def combinations([h | t], m) do
     for(l <- combinations(t, m - 1), do: [h | l]) ++ combinations(t, m)
   end
+
+  def mod(a, b) do
+    a - b * Integer.floor_div(a, b)
+  end
 end

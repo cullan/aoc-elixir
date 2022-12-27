@@ -211,13 +211,19 @@ defmodule AdventOfCode.Grid do
     end
   end
 
-  def neighbors(%Grid{} = g, point, args \\ []) do
+  def neighbor_points(point, args \\ []) do
     diagonals? = args[:diagonals] || false
     diagonal_directions = [:up_left, :up_right, :down_left, :down_right]
+    self? = args[:self] || false
 
     [:up, :down, :left, :right]
     |> Enum.concat(if diagonals?, do: diagonal_directions, else: [])
     |> Enum.map(&move(point, &1))
+    |> Enum.concat(if self?, do: [point], else: [])
+  end
+
+  def neighbors(%Grid{} = g, {_x, _y} = point, args \\ []) do
+    neighbor_points(point, args)
     |> Enum.filter(&in_bounds?(g, &1))
   end
 
