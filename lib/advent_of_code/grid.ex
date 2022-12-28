@@ -20,7 +20,7 @@ defmodule AdventOfCode.Grid do
     %Grid{upper_left: {0, 0}, lower_right: lower_right(items), cells: cells}
   end
 
-  def new(s, transform \\ &default_cell_transform/1) when is_binary(s) do
+  def new(s, transform \\ &default_cell_transform/2) when is_binary(s) do
     s
     |> String.split("\n", trim: true)
     |> Stream.with_index()
@@ -29,7 +29,7 @@ defmodule AdventOfCode.Grid do
       |> String.codepoints()
       |> Stream.with_index()
       |> Enum.reduce(row_g, fn {val, col_num}, col_g ->
-        case transform.(val) do
+        case transform.(col_g, {{col_num, row_num}, val}) do
           nil -> col_g
           new_val -> put(col_g, {col_num, row_num}, new_val)
         end
@@ -44,7 +44,7 @@ defmodule AdventOfCode.Grid do
   #
   # sometimes there is a " " (space char) that is in the string, but not part of
   # the map. those should be discarded.
-  defp default_cell_transform(c) do
+  defp default_cell_transform(%Grid{}, {_position, c}) do
     case c do
       " " -> nil
       _ -> c
