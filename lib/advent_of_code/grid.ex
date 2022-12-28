@@ -55,6 +55,9 @@ defmodule AdventOfCode.Grid do
     {length(hd(items)) - 1, length(items) - 1}
   end
 
+  def width(%Grid{upper_left: {x1, _y1}, lower_right: {x2, _y2}}), do: x2 - x1 + 1
+  def height(%Grid{upper_left: {_x1, y1}, lower_right: {_x2, y2}}), do: y2 - y1 + 1
+
   @doc """
   Return the results of running the function on each cell.
 
@@ -279,6 +282,27 @@ defmodule AdventOfCode.Grid do
     cells
     |> Enum.reduce({0, 0}, fn {{x, y}, _}, {max_x, max_y} ->
       {max(x, max_x), max(y, max_y)}
+    end)
+  end
+
+  def rotate_point(width, height, {x, y}, direction) do
+    case direction do
+      :right -> {width - y - 1, x}
+      :down -> {width - x - 1, height - y - 1}
+      :left -> {y, height - x - 1}
+      :up -> {x, y}
+      _ -> :error
+    end
+  end
+
+  def rotate(%Grid{} = g, :up), do: g
+
+  def rotate(%Grid{} = g, direction) do
+    width = width(g)
+    height = height(g)
+
+    Grid.reduce(g, Grid.new(), fn _g, {position, val}, acc ->
+      Grid.put(acc, rotate_point(width, height, position, direction), val)
     end)
   end
 
