@@ -39,4 +39,12 @@ defmodule AdventOfCode.Math do
   def mod(a, b) do
     a - b * Integer.floor_div(a, b)
   end
+
+  def multiply_matrix(a, b) do
+    for(row_a <- a, col_b <- transpose_matrix(b), do: [row_a, col_b])
+    |> Enum.map(&(Enum.zip_with(&1, fn [a, b] -> a * b end) |> Enum.sum()))
+    |> Enum.chunk_every(length(a))
+  end
+
+  def transpose_matrix(m), do: m |> Enum.zip() |> Enum.map(&Tuple.to_list(&1))
 end

@@ -1,5 +1,6 @@
 defmodule AdventOfCode.Grid do
   alias __MODULE__
+  alias AdventOfCode.Math
 
   defstruct [:upper_left, :lower_right, :cells]
 
@@ -44,7 +45,7 @@ defmodule AdventOfCode.Grid do
   #
   # sometimes there is a " " (space char) that is in the string, but not part of
   # the map. those should be discarded.
-  defp default_cell_transform(%Grid{}, {_position, c}) do
+  defp default_cell_transform(%Grid{}, {_point, c}) do
     case c do
       " " -> nil
       _ -> c
@@ -95,6 +96,14 @@ defmodule AdventOfCode.Grid do
     |> Enum.sort_by(&elem(&1, 0))
   end
 
+  def rows(%Grid{} = g) do
+    {_, y1} = g.upper_left
+    {_, y2} = g.lower_right
+
+    for(row <- y1..y2, do: row)
+    |> Enum.map(&Grid.row(g, &1))
+  end
+
   @doc """
   Return a list of the cells in the given column.
   """
@@ -102,6 +111,14 @@ defmodule AdventOfCode.Grid do
     cells
     |> Enum.filter(fn {{x, _y}, _val} -> x == col end)
     |> Enum.sort_by(&elem(&1, 0))
+  end
+
+  def cols(%Grid{} = g) do
+    {x1, _} = g.upper_left
+    {x2, _} = g.lower_right
+
+    for(col <- x1..x2, do: col)
+    |> Enum.map(&Grid.col(g, &1))
   end
 
   @doc """
@@ -285,11 +302,11 @@ defmodule AdventOfCode.Grid do
     end)
   end
 
-  def rotate_point(width, height, {x, y}, direction) do
+  def rotate_point({x, y}, direction, width, height) do
     case direction do
-      :right -> {width - y - 1, x}
+      :right -> {height - y - 1, x}
       :down -> {width - x - 1, height - y - 1}
-      :left -> {y, height - x - 1}
+      :left -> {y, width - x - 1}
       :up -> {x, y}
       _ -> :error
     end
@@ -301,15 +318,70 @@ defmodule AdventOfCode.Grid do
     width = width(g)
     height = height(g)
 
-    Grid.reduce(g, Grid.new(), fn _g, {position, val}, acc ->
-      Grid.put(acc, rotate_point(width, height, position, direction), val)
+    Grid.reduce(g, Grid.new(), fn _g, {point, val}, acc ->
+      Grid.put(acc, rotate_point(point, direction, width, height), val)
+    end)
+  end
+
+  def reflect_point(point, :horizontal),
+    do: reflect_point(point, [[1, 0, 0], [0, -1, 0], [0, 0, 1]])
+
+  def reflect_point(point, :vertical),
+    do: reflect_point(point, [[-1, 0, 0], [0, 1, 0], [0, 0, 1]])
+
+  def reflect_point({x, y}, reflection_matrix) when is_list(reflection_matrix) do
+    Math.multiply_matrix([[x, y, 1]], reflection_matrix)
+    |> Enum.zip_with(fn [x, y, _] -> {x, y} end)
+    |> hd()
+  end
+
+  # reflect the grid about the axis in the center of the grid.
+  def reflect(%Grid{} = g, axis) do
+    offset_fun =
+      case axis do
+        :horizontal -> fn {x, y} -> {x, y + Grid.height(g) - 1} end
+        :vertical -> fn {x, y} -> {x + Grid.width(g) - 1, y} end
+      end
+
+    %Grid{
+      g
+      | cells:
+          Grid.map(g, fn _g, {point, val} ->
+            {offset_fun.(reflect_point(point, axis)), val}
+          end)
+          |> Map.new()
+    }
+  end
+
+  def merge(%Grid{} = g1, %Grid{} = g2, transform \\ & &1) do
+    Grid.reduce(g2, g1, fn g, cell, acc ->
+      {point, val} = transform.(g, cell)
+      Grid.put(acc, point, val)
+    end)
+  end
+
+  def extract_rectangle(%Grid{} = g, {x1, y1}, {x2, y2}, args \\ []) do
+    # default to putting the rectangle at {0, 0}.
+    x_offset = args[:x_offset] || -x1
+    y_offset = args[:y_offset] || -y1
+
+    for(x <- x1..x2, y <- y1..y2, do: {x, y})
+    |> Enum.reduce(Grid.new(), fn {x, y}, new_grid ->
+      case Grid.at(g, {x, y}) do
+        {:ok, val} -> Grid.put(new_grid, {x + x_offset, y + y_offset}, val)
+        _ -> new_grid
+      end
     end)
   end
 
   @doc """
   Create a string representation of the grid contents.
   """
-  def to_string(%Grid{cells: cells} = g, args \\ []) do
+  def to_string(grid, args \\ [])
+
+  def to_string(%Grid{cells: cells}, _) when cells == %{}, do: ""
+
+  def to_string(%Grid{cells: cells} = g, args) do
     cell_fmt = args[:cell_fmt] || (& &1)
     default = args[:default] || " "
     {x1, y1} = args[:upper_left] || min_extent(g)
